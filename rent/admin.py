@@ -6,6 +6,9 @@ from .models.vehicle import (
     TrailerDocument,
     TrailerPlates
 )
+from .models.trailer_deposit import (
+    TrailerDeposit
+)
 from .models.tracker import (
     Tracker,
     TrackerUpload,
@@ -22,7 +25,7 @@ from .models.lease import (
     LeaseDocument,
     LeaseDeposit,
     SecurityDepositDevolution,
-    Note,
+    Note
 )
 
 admin.site.register(Trailer)
@@ -44,3 +47,4 @@ admin.site.register(LeaseDeposit)
 admin.site.register(TrailerPlates)
 admin.site.register(SecurityDepositDevolution)
 admin.site.register(Note)
+admin.site.register(TrailerDeposit)

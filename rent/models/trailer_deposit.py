@@ -57,7 +57,7 @@ class TrailerDeposit(models.Model):
     returned_note = models.TextField(null=True, blank=True)
 
     def __str__(self):
-        return f"${self.amount} ({self.lease}) [{self.trailer}]"
+        return f"${self.amount} [{self.trailer}]"
 
     @property
     def returned(self):
