@@ -173,6 +173,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
 SECURE_CROSS_ORIGIN_OPENER_POLICY = None
 
+CSRF_TRUSTED_ORIGINS = ['https://rental.towithouston.com']
 
 load_dotenv(".env")
 
