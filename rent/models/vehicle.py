@@ -10,6 +10,7 @@ from django.utils.translation import gettext_lazy as _
 from PIL import Image
 
 from utils.tools.pos_tools import getPosValidator
+from users.models import Associated
 
 
 def year_choices():
@@ -30,7 +31,13 @@ class Equipment(models.Model):
 
 class Manufacturer(models.Model):
     brand_name = models.CharField(max_length=50)
-    url = models.URLField()
+    TYPE_CHOICE = (
+        ("hotshot", "hotshot"),
+        ("semi", "Semi"),
+    )
+    type = models.CharField(
+        max_length=20, choices=TYPE_CHOICE, default="hotshot")
+    url = models.URLField(blank=True)
     ICON_SIZE = 500
     icon = models.ImageField(upload_to="images/manufacturers", blank=True)
 
@@ -53,22 +60,41 @@ class Manufacturer(models.Model):
 class Trailer(Equipment):
     cdl = models.BooleanField()
     TYPE_CHOICE = (
+        ("hotshot", "hotshot"),
+        ("semi", "Semi"),
+    )
+    type = models.CharField(
+        max_length=20, choices=TYPE_CHOICE, default="hotshot")
+    SUBTYPE_CHOICE = (
         ("flatbed", "Flatbed"),
+        ("dryvan", "Dry Van"),
+        ("refrigerated", "Refrigerated"),
+        ("stepdeck", "Step Deck"),
+        ("lowboy", "Lowboy"),
+        ("dropdeck", "Drop Deck"),
+        ("enddump", "End Dump"),
         ("6_car", "6-Car"),
         ("3_car_w", "3-Car Wedge"),
         ("3_car_l", "3-Car Low profile"),
         ("3_car_f", "3-Car Flatbed"),
         ("mini5", "Mini-5"),
-        ("lowboy", "Lowboy"),
         ("ez4", "EZ-4"),
         ("other", _("Other")),
     )
-    type = models.CharField(max_length=20, choices=TYPE_CHOICE)
+    subtype = models.CharField(max_length=20, choices=SUBTYPE_CHOICE)
+    SIZE_CHOICE = (
+        ("4896", "48-96"),
+        ("48102", "48-102"),
+        ("5396", "53-96"),
+        ("53102", "53-102"),
+    )
+    size = models.CharField(
+        max_length=20, choices=SIZE_CHOICE, null=True, blank=True)
     manufacturer = models.ForeignKey(
         Manufacturer,
         on_delete=models.SET_NULL,
         null=True,
-        blank=True,
+        blank=True
     )
     AXIS_CHIOCES = [(1, 1), (2, 2), (3, 3)]
     axis_number = models.IntegerField(
@@ -77,11 +103,27 @@ class Trailer(Equipment):
     load = models.IntegerField(_("Axle load capacity"), choices=LOAD_CHOICE)
     active = models.BooleanField(default=True)
     lease_to_own = models.BooleanField(default=False)
+    gps = models.BooleanField(default=False)
     position = models.IntegerField(
         blank=True,
         null=True,
         validators=getPosValidator(),
     )
+    OWNER_CHOICE = (
+        ("towit", "TOWIT"),
+        ("admin", "ADMIN"),
+    )
+    ownership = models.CharField(
+        max_length=20, choices=OWNER_CHOICE, default="towit")
+    owner = models.ForeignKey(
+        Associated,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="trailer_owner",
+    )
+    buy_price = models.FloatField(default=0)
+    initial_maintenance_cost = models.FloatField(default=0)
     position_date = models.DateTimeField(null=True, blank=True)
     position_note = models.TextField(null=True, blank=True)
 

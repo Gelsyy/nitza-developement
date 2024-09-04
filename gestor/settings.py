@@ -40,6 +40,7 @@ ALLOWED_HOSTS = [
     "testserver",
     "www.tacocars.com",
     "192.168.43.89",
+    "rental.towithouston.com"
 ]
 
 

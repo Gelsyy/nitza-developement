@@ -53,6 +53,8 @@ class ContractForm(ModelForm):
             "service_charge",
             "contract_type",
             "total_amount",
+            "insurance_details",
+            "insuranced"
         )
 
     def __init__(self, *args, **kwargs):
@@ -106,12 +108,15 @@ class ContractForm(ModelForm):
                 "contract_type",
                 mark_safe("<i class='bx bx-file' ></i>"),
             ),
+            Field("insuranced", css_class="mb-3"),
+            Field("insurance_details", rows="2"),
             PrependedText(
                 "total_amount",
                 mark_safe("<i class='bx bx-dollar' ></i>"),
             ),
             ButtonHolder(
-                Submit("submit", "Create contract", css_class="btn btn-success")
+                Submit("submit", "Create contract",
+                       css_class="btn btn-success")
             ),
         )
 
@@ -165,7 +170,8 @@ class InspectionForm(forms.ModelForm):
         )
 
 
-TireFormSet = modelformset_factory(Tire, fields=("remaining_life",), edit_only=True)
+TireFormSet = modelformset_factory(
+    Tire, fields=("remaining_life",), edit_only=True)
 
 
 class LesseeDataForm(forms.ModelForm):
@@ -222,7 +228,8 @@ class LesseeDataForm(forms.ModelForm):
                 ),
                 css_class="xl:flex gap-2",
             ),
-            ButtonHolder(Submit("submit", "Enviar", css_class="btn btn-success")),
+            ButtonHolder(Submit("submit", "Enviar",
+                         css_class="btn btn-success")),
         )
 
 
@@ -236,7 +243,8 @@ class SecurityDepositDevolutionForm(forms.ModelForm):
 
         self.fields["immediate_refund"].required = False
 
-        self.initial["refund_date"] = datetime.now().date() + relativedelta(months=1)
+        self.initial["refund_date"] = datetime.now().date() + \
+            relativedelta(months=1)
         self.fields["refund_date"] = forms.DateField(
             widget=forms.DateInput(
                 attrs={"type": "date"},
@@ -283,7 +291,8 @@ class SecurityDepositDevolutionForm(forms.ModelForm):
             if date is None or date == "":
                 raise forms.ValidationError("Please insert a refund date")
             if date < datetime.now().date():
-                raise forms.ValidationError("Please insert a valid refund date")
+                raise forms.ValidationError(
+                    "Please insert a valid refund date")
 
         return cleaned_data
 
@@ -403,7 +412,8 @@ class PaymentForm(forms.ModelForm):
             Field("sender_name"),
             Field("date_of_payment"),
             Field("amount"),
-            ButtonHolder(Submit("submit", "Enviar", css_class="btn btn-success")),
+            ButtonHolder(Submit("submit", "Enviar",
+                         css_class="btn btn-success")),
         )
 
 
@@ -425,7 +435,8 @@ class LeaseUpdateForm(forms.ModelForm):
         self.helper.layout = Layout(
             PrependedText("payment_amount", "$"),
             Field("payment_frequency"),
-            ButtonHolder(Submit("submit", "Enviar", css_class="btn btn-success")),
+            ButtonHolder(Submit("submit", "Enviar",
+                         css_class="btn btn-success")),
         )
 
 
@@ -459,7 +470,8 @@ class NoteForm(forms.ModelForm):
         if has_reminder:
             if reminder_date:
                 if reminder_date < timezone.now():
-                    raise forms.ValidationError("Reminder date cannot be in the past!")
+                    raise forms.ValidationError(
+                        "Reminder date cannot be in the past!")
             else:
                 raise forms.ValidationError(
                     "If the reminder checkbox is selected you must provide a remidner date!"
@@ -481,7 +493,8 @@ class LeaseDocumentForm(forms.ModelForm):
             Field("name", placeholder="Name"),
             Field("file", placeholder="Name"),
             Field("note", placeholder="Note", rows="2"),
-            ButtonHolder(Submit("submit", "Enviar", css_class="btn btn-success")),
+            ButtonHolder(Submit("submit", "Enviar",
+                         css_class="btn btn-success")),
         )
 
 
@@ -498,7 +511,8 @@ class DueForm(forms.ModelForm):
         self.helper.layout = Layout(
             PrependedText("amount", "$"),
             Field("note", placeholder="Note", rows="2"),
-            ButtonHolder(Submit("submit", "Enviar", css_class="btn btn-success")),
+            ButtonHolder(Submit("submit", "Enviar",
+                         css_class="btn btn-success")),
         )
 
 
@@ -521,5 +535,6 @@ class LeaseDepositForm(forms.ModelForm):
             PrependedText("amount", "$"),
             Field("date"),
             Field("note", placeholder="Note", rows="2"),
-            ButtonHolder(Submit("submit", "Enviar", css_class="btn btn-success")),
+            ButtonHolder(Submit("submit", "Enviar",
+                         css_class="btn btn-success")),
         )

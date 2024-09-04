@@ -1,5 +1,6 @@
 {% extends 'base/base_form.html' %}
 {% load crispy_forms_tags %}
+{% load static %}
 {% block title %}
     {{ title }}
 {% endblock title %}
@@ -12,7 +13,7 @@
             <div class="card-header d-flex align-items-center justify-content-between">
                 <h5 class="mb-0">{{ title }}</h5>
             </div>
-            <div class="card-body">
+            <div class="card-body" x-data="createTrailer">
                 <form enctype="multipart/form-data" method="post" id="update-form">
                     {% csrf_token %}
                     {% crispy form %}
@@ -20,4 +21,6 @@
             </div>
         </div>
     </div>
+    <script src="{% static "assets/js/create_trailer.js" %}">
+    </script>
 {% endblock content %}

@@ -1,4 +1,4 @@
-from crispy_forms.bootstrap import AppendedText
+from crispy_forms.bootstrap import AppendedText, PrependedText
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import ButtonHolder
 from crispy_forms.layout import Div
@@ -13,10 +13,13 @@ from rent.models.vehicle import Manufacturer
 from rent.models.vehicle import Trailer
 from rent.models.vehicle import TrailerDocument
 from rent.models.vehicle import TrailerPicture
+from users.models import Associated
 from services.tools.available_positions import get_available_positions
 from utils.forms import (
     BaseForm,
 )
+
+from django.utils.translation import gettext_lazy as _
 
 
 class ManufacturerForm(forms.ModelForm):
@@ -40,20 +43,30 @@ class TrailerCreateForm(BaseForm):
     class Meta:
         model = Trailer
         fields = (
+            "type",
+            "size",
             "note",
             "vin",
             "year",
+            "gps",
+            "ownership",
+            "owner",
+            "buy_price",
+            "initial_maintenance_cost",
             "cdl",
-            "type",
+            "subtype",
             "plate",
             "manufacturer",
             "axis_number",
             "load",
-            "lease_to_own",
-            "active",
             "position",
             "position_note",
         )
+        labels = {
+            'manufacturer': 'Brand',
+            'gps': 'Has GPS',
+            'ownership': 'Owner'
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -65,6 +78,12 @@ class TrailerCreateForm(BaseForm):
             null=True,
             # unselected=not pos_readonly,
         )
+        self.fields["owner"] = forms.ModelChoiceField(
+            queryset=Associated.objects.filter(type="client").order_by("-id"),
+            label=_("Associated"),
+            required=False  # This makes the field not required
+        )
+
         self.initial["position"] = self.instance.position
         self.initial["position_note"] = self.instance.position_note
         self.fields["position"].widget = forms.Select(
@@ -79,28 +98,41 @@ class TrailerCreateForm(BaseForm):
             self.fields["position_note"].widget.attrs["disabled"] = True
 
         self.helper.layout = Layout(
-            Field("manufacturer"),
-            Field("type"),
-            Field("year"),
-            Field("vin"),
-            Field("plate"),
-            Field(
-                AppendedText(
-                    "position",
-                    (
-                        ""
-                        if self.instance.position_date is None
-                        else self.instance.position_date.strftime("%b %d, %Y")
-                    ),
-                ),
-            ),
-            Field("position_note"),
-            Field("cdl"),
-            Field("axis_number"),
-            Field("load"),
-            Field("note", rows="2"),
-            Field("lease_to_own"),
-            Field("active"),
+            Fieldset('General Information',
+                     Field("type"),
+                     Field("size"),
+                     Field("subtype"),
+                     Field("manufacturer"),
+                     Field("year"),
+                     Field("axis_number"),
+                     Field("load"),
+                     ),
+            Fieldset('Legal Information',
+                     Field("vin"),
+                     Field("plate"),
+                     Field("cdl"),
+                     Field("ownership"),
+                     Field("owner"),
+                     ),
+            Fieldset('Financial Information',
+                     Field(PrependedText('buy_price', '$')),
+                     Field(PrependedText("initial_maintenance_cost", '$')),
+                     ),
+            Fieldset('Adminitrative Information',
+                     Field("gps"),
+                     Field(
+                         AppendedText(
+                             "position",
+                             (
+                                 ""
+                                 if self.instance.position_date is None
+                                 else self.instance.position_date.strftime("%b %d, %Y")
+                             ),
+                         ),
+                     ),
+                     Field("position_note"),
+                     Field("note", rows="2"),
+                     ),
             ButtonHolder(Submit("submit", "Enviar",
                          css_class="btn btn-success")),
         )

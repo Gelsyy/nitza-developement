@@ -90,6 +90,9 @@ class Contract(models.Model):
     renovation_15_notify = models.BooleanField(default=False)
     renovation_7_notify = models.BooleanField(default=False)
 
+    insuranced = models.BooleanField(default=False)
+    insurance_details = models.TextField(null=True, blank=True)
+
     ####### Renovations #########################################
     def _notify(self, status):
         # return
