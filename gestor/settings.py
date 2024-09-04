@@ -158,14 +158,14 @@ USE_TZ = True
 
 
 # AUTH_USER_MODEL = 'users.User'
-LOGIN_URL = "/erp/users/login/"
+LOGIN_URL = "/users/login/"
 
 MEDIA_ROOT = "media/"
 MEDIA_URL = "/media/"
 
-LOGIN_REDIRECT_URL = "/erp/"
+LOGIN_REDIRECT_URL = "/"
 
-LOGOUT_REDIRECT_URL = "/erp/users/login/"
+LOGOUT_REDIRECT_URL = "/users/login/"
 
 CRISPY_TEMPLATE_PACK = "bootstrap3"
 
