@@ -12,7 +12,7 @@ COPY requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Mounts the application code to the image
-COPY . /app
+# COPY . /app
 
 EXPOSE 8111
 
