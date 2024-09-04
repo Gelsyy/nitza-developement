@@ -40,7 +40,6 @@ def createCalendarData(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('schedule', '0014_use_autofields_for_pk'),
         ('rent', '0019_handwriting_date'),
     ]
 
