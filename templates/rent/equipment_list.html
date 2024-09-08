@@ -50,7 +50,7 @@
                     match('{{ equipment.vin }} {{ equipment.year }} {{ equipment.model }} {{ equipment.manufacturer }}', $store.search.search)
                    ">
             <td>
-                <a href={% url 'update-trailer' equipment.id %}>{{ equipment.number }}</a>
+                <a href={% url 'detail-trailer' equipment.id %}>{{ equipment.number }}</a>
             </td>
             <td>
                 <div class="d-flex">
