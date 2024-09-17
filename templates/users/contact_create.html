@@ -1,0 +1,126 @@
+{% extends 'base/base_form.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% block title %}
+    {{ title }}
+{% endblock title %}
+{% block img_id %}
+    <script>
+        const img_id = "id_avatar";
+    </script>
+{% endblock img_id %}
+{% block content %}
+    <!-- Basic with Icons -->
+    <form enctype="multipart/form-data" method="post" id="update-form">
+        <div class="lg:flex" x-data="{has_guarantor: $refs.guarantor && $refs.guarantor.checked ? true : false}">
+            <div class="lg:flex-grow lg:mr-2">
+                <div class="card mb-4">
+                    <div class="card-header d-flex align-items-center justify-content-between">
+                        <h5 class="mb-0">{{ title }}</h5>
+                        {% if form.instance.delete_url %}
+                            <a onclick="deleteContact('{% url form.instance.delete_url form.instance.id %}', '{{ form.instance.name }}')"
+                               type="button"
+                               class="btn btn-icon btn-outline-danger float-end">
+                                <span class="tf-icons bx bx-trash"></span>
+                            </a>
+                        {% endif %}
+                    </div>
+                    <div class="card-body">
+                        {% csrf_token %}
+                        {% crispy form %}
+                        <div>
+                            <input type="hidden" name="next" value="{{ next }}" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {%if formGuarantor%}
+                <div class="lg:flex-grow lg:ml-2" x-cloak x-show="has_guarantor">
+                    <div class="card mb-4">
+                        <div class="card-header d-flex align-items-center justify-content-between">
+                            <h5 class="mb-0">Guarantor</h5>
+                        </div>
+                        <div class="card-body" id="guarantor">
+                            {% crispy formGuarantor %}
+                        </div>
+                        <script src='{% static "assets/js/clients/guarantor.js" %}'></script>
+                    </div>
+                </div>
+            {%endif%}
+        </div>
+    </form>
+    <script>
+        let state, state_select, city_select, city;
+
+        // Clean select options
+        function removeAll(selectBox) {
+            while (selectBox.options.length > 0) {
+                selectBox.remove(0);
+            }
+        }
+
+        const cities = {}
+        {% for state, city_data in cities.items %}
+            cities.{{state}} = {}
+            {% for city, city_name in city_data.items %}cities.{{state}}.{{city}} = "{{city_name}}";{% endfor %}
+        {% endfor %}
+
+        function updateState(event){
+            if (state_select.value == "other"){
+                state.style.display = "";
+                state.value = "";
+                city.style.display = "";
+                city.value = "";
+                // Modify City city_select
+                removeAll(city_select);
+                newOption = new Option('Other','other');
+                city_select.add(newOption,undefined);
+            } else {
+                state.style.display = "none";
+                state.value = state_select.value;
+                city.style.display = "none";
+                city.value = city_select.value;
+                // Modify City city_select
+                removeAll(city_select);
+                // Iterate for cities in the state
+                let newOption;
+                for (const [key, value] of Object.entries(cities[state_select.value])) {
+                    newOption = new Option(value,key);
+                    city_select.add(newOption,undefined);
+                }
+                newOption = new Option('Other','other');
+                city_select.add(newOption,undefined);
+            }
+        }
+        function updateCity(event){
+            if (city_select.value == "other"){
+                city.style.display = "";
+                city.value = "";
+            } else {
+                city.style.display = "none";
+                city.value = state_select.value;
+            }
+        }
+        window.addEventListener("load", (event) => {
+            state_select = document.getElementById("id_state");
+            state = document.getElementById("div_id_other_state");
+            city_select = document.getElementById("id_city");
+            city = document.getElementById("div_id_other_city");
+
+            state.style.display = "none";
+            city.style.display = "none";
+
+            state_select.onchange = updateState;
+            city_select.onchange = updateCity;
+
+            updateState();
+        });
+
+        function deleteContact(url, name) {
+            let confirmAction = confirm("Are you sure to delete " + name + "?");
+            if (confirmAction) {
+                window.location = url;
+            }
+        }
+    </script>
+{% endblock content %}

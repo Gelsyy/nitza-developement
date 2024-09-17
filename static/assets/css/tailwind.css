@@ -1,0 +1,22 @@
+/* @tailwind base; */
+@tailwind components;
+@tailwind utilities;
+
+[x-cloak] {
+  display: none !important;
+}
+
+.collapse {
+  visibility: unset;
+}
+
+.match {
+  @apply !text-main !font-bold;
+}
+
+.text-primary .match,
+.text-primary.match,
+a .match,
+a.match {
+  @apply !text-red-800 !font-bold;
+}

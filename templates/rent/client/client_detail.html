@@ -1,0 +1,149 @@
+{% extends "base/base.html" %}
+{% load static %}
+{% load debug %}
+{% block page %}
+    <style>
+        .table-container {
+            height: 300px; /* Set the desired fixed height for the table */
+            overflow-y: scroll; /* Enable vertical scrolling */
+        }
+        .table td {
+            padding-right: 0;
+        }
+    </style>
+    <script>
+        function deleteDocument(name, id) {
+            let confirmAction = confirm("Are you sure to delete the document: " + name + "?");
+            if (confirmAction) {
+                window.location ="{% url 'delete-lease-document' id='PLACEHOLDER' %}".replace('PLACEHOLDER', id);
+            }
+        }
+        function deleteNote(id, text) {
+            let confirmAction = confirm("Are you sure to delete the note: " + text + "?");
+            if (confirmAction) {
+                window.location ="{% url 'delete-note' id='PLACEHOLDER' %}".replace('PLACEHOLDER', id);
+            }
+        }
+        function deactivateReminder(id) {
+            let confirmAction = confirm("Are you sure to deactivate this reminder?");
+            if (confirmAction) {
+                window.location ="{% url 'deactivate-reminder' id='PLACEHOLDER' %}".replace('PLACEHOLDER', id);
+            }
+        }
+        function deleteDeposit(amount, id) {
+            let confirmAction = confirm("Are you sure to delete the depsoit of: $" + amount + "?");
+            if (confirmAction) {
+                window.location ="{% url 'delete-lease-deposit' id='PLACEHOLDER' %}".replace('PLACEHOLDER', id);
+            }
+        }
+        function deletePayment(amount, date, id) {
+            let confirmAction = confirm("Are you sure to delete the payment of: $" + amount + " on " +date+ "?");
+            if (confirmAction) {
+                window.location ="{% url 'revert-payment' id='PLACEHOLDER' %}".replace('PLACEHOLDER', id);
+            }
+        }
+    </script>
+{% endblock page %}
+{% block content %}
+    <div class="card rounded-3xl" x-data="{guarantor:-1}">
+        {% include "./client_details_cmp/client.html" %}
+        <div class="card-body pt-0">
+            {% include "./client_details_cmp/leases.html" %}
+        </div>
+        <div class="card-body pt-0">
+            <div class="tab-content p-0">
+                {% for lease in leases %}
+                    {% include "./client_details_cmp/lease_item_content.html" %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    <script src="{% static 'assets/vendor/libs/apex-charts/apexcharts.js' %}"></script>
+    <script>
+        // Get data
+        let ids = [{% for lease in leases %}"#payment_progress_"+'{{lease.id}}',{% endfor %}];
+        let paids = [{% for lease in leases %}{{lease.paid}},{% endfor %}];
+        let debts = [{% for lease in leases %}{{lease.debt}},{% endfor %}];
+
+        (function () {
+            plot_status(ids[0], paids[0], debts[0]);
+        })();
+        function computePercentage(value, total) {
+            // Calculate the percentage
+            const percentage = (value / total) * 100;
+
+            // Round the percentage to the nearest integer
+            const roundedPercentage = Math.round(percentage);
+
+            // Return the result as an integer
+            return roundedPercentage;
+        }
+        function plot_status(id, paid, debt){
+            let total = paid+debt;
+            var options = {
+                series: [{
+                    name: `Paid: \$${paid}`,
+                    data: [computePercentage(paid, total)],
+                    color: '#0f0'
+                }, {
+                    name: `Debt: \$${debt}`,
+                    data: [computePercentage(debt, total)],
+                    color: '#f00'
+                }],
+                chart: {
+                    type: 'bar',
+                    height: 120,
+                    stacked: true,
+                    stackType: '100%',
+                    toolbar: {
+                        show: false
+                    }
+                },
+                plotOptions: {
+                    bar: {
+                        horizontal: true,
+                    },
+                },
+                stroke: {
+                    width: 1,
+                    colors: ['#fff']
+                },
+                title: {
+                    text: `Total amount: \$${total}`,
+                    offsetY: 20
+                },
+                fill: {
+                    opacity: 1
+
+                },
+                yaxis: {
+                    show: false,
+                    labels: {
+                        show: false
+                    },
+                    axisBorder: {
+                        show: false
+                    },
+                    axisTicks: {
+                        show: false
+                    }
+                },
+                xaxis: {
+                    show: false,
+                    labels: {
+                        show: false
+                    },
+                    axisBorder: {
+                        show: false
+                    },
+                    axisTicks: {
+                        show: false
+                    }
+                }
+            };
+
+            var chart = new ApexCharts(document.querySelector(id), options);
+            chart.render();
+        }
+    </script>
+{% endblock content %}

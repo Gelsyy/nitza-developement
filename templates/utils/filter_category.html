@@ -1,0 +1,21 @@
+{% load static %}
+<div class="demo-inline-spacing mb-2">
+    <button onClick="filterTag('all')"
+            type="button"
+            class="btn btn-icon btn-primary">all</button>
+    {% for category in categories %}
+        <button onClick="filterTag('{{ category.name }}')"
+                type="button"
+                class="btn btn-icon btn-outline-primary"
+                data-bs-toggle="tooltip"
+                data-bs-offset="0,4"
+                data-bs-placement="top"
+                data-bs-html="true"
+                title=""
+                data-bs-original-title="<span>{{ category.name }}</span>">
+            <img class="w-px-30 h-auto"
+                 {% if category.icon %} src="{{ category.icon.url }}" {% else %} src="{% static 'assets/img/icons/no_image.jpg' %}" {% endif %}
+                 alt="">
+        </button>
+    {% endfor %}
+</div>

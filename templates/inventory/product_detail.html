@@ -1,0 +1,419 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% block title %}
+    Product detail
+{% endblock title %}
+{% block content %}
+    <!-- Basic with Icons -->
+    <div class="card">
+        <div class="row g-0">
+            <div class="col-md-8">
+                <div class="card-body">
+                    <h5>
+                        <strong>{{ product.name }}</strong>
+                    </h5>
+                    <div class="card-subtitle text-muted ml-3">{{ product.get_type_display }} - {{ product.category.name }}</div>
+                    <p class="card-text">{{ product.description }}</p>
+                    <div class="card mb-2">
+                        <div class="row">
+                            <div class="card-text col-md-6">
+                                <strong>Average cost:</strong> ${{ product.average_cost|floatformat:"2" }}
+                            </div>
+                            <div class="card-text col-md-6">
+                                <strong>Sell Tax:</strong> {{ product.sell_tax }}%
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card mb-4">
+                        <div class="text-light small fw-semibold">Sell Price</div>
+                        <div class="row">
+                            <div class="card-text col-md-6">
+                                <strong>Suggested:</strong> ${{ product.sell_price|floatformat:"2" }} ({{ product.suggested_price }}%)
+                            </div>
+                            <div class="card-text col-md-6">
+                                <strong>Minimum:</strong> ${{ product.min_price|floatformat:"2" }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <img class="card-img card-img-right"
+                     src="{% if product.image %} {{ product.image.url }} {% else %} {% static 'assets/img/icons/no_image.jpg' %} {% endif %}"
+                     alt="Category icon">
+            </div>
+            <div class="demo-inline-spacing card-body">
+                <a class="btn btn-icon btn-outline-primary"
+                   type="button"
+                   href="{% url 'list-product' %}">
+                    <span class="tf-icons bx bx-arrow-back"></span>
+                </a>
+                <a class="btn btn-icon btn-outline-primary"
+                   type="button"
+                   href="{% url 'update-product' product.id %}">
+                    <span class="tf-icons bx bx-edit"></span>
+                </a>
+                <a class="btn btn-icon btn-outline-primary"
+                   type="button"
+                   onclick="duplicateProduct('{% url 'duplicate-product' product.id %}', '{{ product.name }}')"
+                   data-bs-toggle="tooltip"
+                   data-bs-offset="0,4"
+                   data-bs-placement="top"
+                   data-bs-html="true"
+                   title=""
+                   data-bs-original-title="<span>Duplicate</span>">
+                    <span class="tf-icons bx bx-duplicate"></span>
+                </a>
+                {% if product.can_delete %}
+                    <a onclick="deleteProduct('{% url 'delete-product' product.id %}', '{{ product.name }}')"
+                       type="button"
+                       class="btn btn-icon btn-outline-danger float-end">
+                        <span class="tf-icons bx bx-trash"></span>
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <hr class="my-2">
+    <div class="card">
+        <div class="card-header d-flex align-items-center justify-content-between pb-0">
+            <h5 class="m-0 me-2">Product Statistics</h5>
+        </div>
+        <div class="card-body row">
+            <div class="col-md-6">
+                <div class="col mb-2 mt-3">
+                    Max monthly sells: <strong>{{ max_monthly_sel }}</strong>
+                </div>
+                <div class="col mb-2">
+                    Yearly sells: <strong>{{ yearly_sel }}</strong>
+                </div>
+                <div class="col mb-2">
+                    Average cost: <strong>${{ avg_cost|floatformat:"2" }}</strong>
+                </div>
+                <div class="col mb-2">
+                    Average price: <strong>${{ avg_price|floatformat:"2" }}</strong>
+                </div>
+                <div class="col mb-2">
+                    Average profit: <strong>${{ avg_profit|floatformat:"2" }}</strong>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <small class="text-muted">Sells</small>
+                <div id="sellChart"></div>
+                <div class="resize-triggers">
+                    <div class="expand-trigger">
+                        <div style="width: 650px; height: 377px;"></div>
+                    </div>
+                    <div class="contract-trigger"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <hr class="my-2">
+    <div class="card">
+        <h5 class="card-header">
+            <div class="mb-2">
+                <strong>Stock:</strong>
+                ${{ product.stock_price|floatformat:"2" }}
+                <a class="btn btn-icon btn-outline-primary"
+                   type="button"
+                   href="{% url 'create-order-from-product' product.id %}"
+                   data-bs-toggle="tooltip"
+                   data-bs-offset="0,4"
+                   data-bs-placement="top"
+                   data-bs-html="true"
+                   title=""
+                   data-bs-original-title="<span>Restock</span>">
+                    <span class="tf-icons bx bx-cart"></span>
+                </a>
+            </div>
+            <div class="row">
+                <div class="d-flex col-md-4 mb-2">
+                    <div class="avatar flex-shrink-0 me-3">
+                        <span class="avatar-initial rounded bg-label-{% if product.quantity_min > product.quantity %}danger{% else %}success{% endif %}"><i class="bx bx-collection"></i></span>
+                    </div>
+                    <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+                        <div class="me-2">
+                            <h6 class="mb-0 {% if product.quantity_min > product.quantity %}bg-label-danger{% endif %}">
+                                {% if product.quantity_min > 0 %}
+                                    {{ product.quantity|floatformat:"-2" }} (> {{ product.quantity_min|floatformat:"-2" }})
+                                {% else %}
+                                    {{ product.quantity|floatformat:"-2" }}
+                                {% endif %}
+                            </h6>
+                            <small class="text-muted">In place</small>
+                        </div>
+                    </div>
+                </div>
+                {% if product.processing %}
+                    <div class="d-flex col-md-4 mb-2">
+                        <div class="avatar flex-shrink-0 me-3">
+                            <span class="avatar-initial rounded bg-label-primary"><i class="bx bx-mail-send"></i></span>
+                        </div>
+                        <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+                            <div class="me-2">
+                                <h6 class="mb-0">{{ product.processing|floatformat:"-2" }}</h6>
+                                <small class="text-muted">Processing</small>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+                {% if product.pending %}
+                    <div class="d-flex col-md-4 mb-2">
+                        <div class="avatar flex-shrink-0 me-3">
+                            <span class="avatar-initial rounded bg-label-warning"><i class="bx bx-cart"></i></span>
+                        </div>
+                        <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+                            <div class="me-2">
+                                <h6 class="mb-0">{{ product.pending|floatformat:"-2" }}</h6>
+                                <small class="text-muted">Pending</small>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </h5>
+        <div class="table-responsive text-nowrap">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Qty</th>
+                        <th>Unit</th>
+                        <th>Date</th>
+                        <th>Cost</th>
+                    </tr>
+                </thead>
+                <tbody class="table-border-bottom-0">
+                    {% for stock in stocks %}
+                        <tr>
+                            <td>
+                                <strong>{{ stock.quantity|floatformat:"-2" }}</strong>
+                            </td>
+                            <td>{{ product.unit }}</td>
+                            <td>{{ stock.created_date|date:"m/d/Y" }}</td>
+                            <td>${{ stock.cost|floatformat:"2" }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <hr class="my-2">
+    <div class="card">
+        <h5 class="card-header">Purchases</h5>
+        <div class="card-body">
+            <div class="card-subtitle text-muted mb-3">{{ latest_order.associated }}</div>
+            <div class="table-responsive text-nowrap">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Qty</th>
+                            <th>Unit</th>
+                            <th>Date</th>
+                            <th>Provider</th>
+                            <th>Price</th>
+                            <th>Tax</th>
+                            <th>
+                                <i class="bx bx-cog"></i>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="table-border-bottom-0">
+                        {% for purchase in purchases %}
+                            <tr>
+                                <td>
+                                    <strong>{{ purchase.quantity|floatformat:"-2" }}</strong>
+                                </td>
+                                <td>{{ purchase.unit }}</td>
+                                <td>{{ purchase.order.created_date|date:"m/d/Y" }}</td>
+                                <td>
+                                    <a href={% url 'detail-associated' purchase.order.associated.id %}>{{ purchase.order.associated }}</a>
+                                </td>
+                                <td>${{ purchase.price|floatformat:"2" }}</td>
+                                <td>{{ purchase.tax }}%</td>
+                                <td>
+                                    <a href={% url 'detail-order' purchase.order.id %}><i class="bx bx-dots-vertical-rounded"></i></a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <hr class="my-2">
+    <div class="card mb-3">
+        <div class="card-body">
+            <h5 class="card-title">
+                Price references
+                <a href="{% url 'create-price' product.id %}">
+                    <button type="button"
+                            class="btn rounded-pill btn-icon btn-primary"
+                            data-bs-toggle="tooltip"
+                            data-bs-offset="0,4"
+                            data-bs-placement="top"
+                            data-bs-html="true"
+                            title=""
+                            data-bs-original-title="Add price reference">
+                        <span class="tf-icons bx bx-plus"></span>
+                    </button>
+                </a>
+            </h5>
+            {% if price_references %}
+                <div class="table-responsive text-nowrap">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>
+                                    <i class="bx bx-cog"></i>
+                                </th>
+                                <th>Store</th>
+                                <th>price</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody class="table-border-bottom-0">
+                            {% for price in price_references %}
+                                <tr data-tag="{{ price.store }}">
+                                    <td>
+                                        <a href="{% url 'update-price' price.id %}"><i class="bx bx-dots-vertical-rounded"></i></a>
+                                    </td>
+                                    <td>
+                                        <a target="blank" href="{{ price.url }}"> <strong>{{ price.store }}</strong></a>
+                                    </td>
+                                    <td>${{ price.price|floatformat:"2" }}</td>
+                                    <td>{{ price.updated_date|date:"m/d/Y" }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    <script src="{% static 'assets/vendor/libs/apex-charts/apexcharts.js' %}"></script>
+    <script>
+        let cardColor, headingColor, axisColor, shadeColor, borderColor;
+
+        cardColor = config.colors.white;
+        headingColor = config.colors.headingColor;
+        axisColor = config.colors.axisColor;
+        borderColor = config.colors.borderColor;
+        (function () {
+
+        let selector, time_labels, profit_data
+
+        time_labels = [{% for label in time_labels %}'{{label}}',{% endfor %}];        
+        data = [{% for value in monthly_sels %}{{value}},{% endfor %}];
+        plotChart('#sellChart', time_labels, data, "Sells");
+        })();
+
+        // Area chart
+        // --------------------------------------------------------------------
+        function plotChart(selector, time_labels, data, indicator){
+            const chartEl = document.querySelector(selector),
+            chartConfig = {
+            series: [
+                {
+                data: data,
+                name: indicator
+                }
+            ],
+            chart: {
+                height: 215,
+                parentHeightOffset: 0,
+                parentWidthOffset: 0,
+                toolbar: {
+                show: false
+                },
+                type: 'area'
+            },
+            dataLabels: {
+                enabled: false
+            },
+            stroke: {
+                width: 2,
+                curve: 'smooth'
+            },
+            legend: {
+                show: false
+            },
+            markers: {
+                size: 6,
+                colors: 'transparent',
+                strokeColors: 'transparent',
+                strokeWidth: 4,
+                discrete: [
+                {
+                    fillColor: config.colors.white,
+                    seriesIndex: 0,
+                    dataPointIndex: data.length-1,
+                    strokeColor: config.colors.primary,
+                    strokeWidth: 2,
+                    size: 6,
+                    radius: 8
+                }
+                ],
+                hover: {
+                size: 7
+                }
+            },
+            colors: [config.colors.primary],
+            fill: {
+                type: 'gradient',
+                gradient: {
+                shade: shadeColor,
+                shadeIntensity: 0.6,
+                opacityFrom: 0.5,
+                opacityTo: 0.25,
+                stops: [0, 95, 100]
+                }
+            },
+            grid: {
+                borderColor: borderColor,
+                strokeDashArray: 3,
+                padding: {
+                top: -20,
+                bottom: -8,
+                left: 5,
+                right: 8
+                }
+            },
+            xaxis: {
+                categories: time_labels,
+                axisBorder: {
+                show: false
+                },
+                axisTicks: {
+                show: false
+                },
+                labels: {
+                show: true,
+                style: {
+                    fontSize: '13px',
+                    colors: axisColor
+                }
+                }
+            },
+            };
+            if (typeof chartEl !== undefined && chartEl !== null) {
+                const chart = new ApexCharts(chartEl, chartConfig);
+                chart.render();
+            }
+        }
+
+        function deleteProduct(url, name) {
+            let confirmAction = confirm("Are you sure to delete the product " + name + "?");
+            if (confirmAction) {
+                window.location = url;
+            }
+        }
+
+        function duplicateProduct(url, name) {
+            let confirmAction = confirm("Do you want to duplicate the product " + name + "?");
+            if (confirmAction) {
+                window.location = url;
+            }
+        }
+    </script>
+{% endblock content %}

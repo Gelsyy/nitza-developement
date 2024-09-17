@@ -1,0 +1,33 @@
+{% load static %}
+<div class="d-flex pb-1">
+    <div class="avatar flex-shrink-0 me-3">
+        <span class="avatar-initial rounded-circle bg-label-primary">
+            <img {% if company.avatar %}src="{{ company.avatar.url }}"{% else %} src="{% static 'assets/img/icons/user.png' %}" {% endif %}
+                 alt="Avatar"
+                 height="100px"
+                 width="100px"
+                 class="w-px-40 rounded-circle" />
+        </span>
+    </div>
+    <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+        <div data-search="{{ company.name }}{{ company.phone_number }}"
+             class="me-2  associated-data">
+            <h6 class="mb-0">{{ company.name }}</h6>
+            <small class="text-muted">{{ company.phone_number }}</small>
+        </div>
+        <div class="user-progress">
+            <form enctype="multipart/form-data" method="post" id="update-form">
+                {% csrf_token %}
+                <div>
+                    <input type="hidden" name="next" value="{{ next }}" />
+                </div>
+                <div>
+                    <input type="hidden" name="id" value="{{ company.id }}" />
+                </div>
+                <button class="btn btn-icon btn-outline-primary" type="submit">
+                    <span class="tf-icons bx bx-check"></span>
+                </button>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,23 @@
+{% extends 'base/base_form.html' %}
+{% load crispy_forms_tags %}
+{% block title %}
+    Add User
+{% endblock title %}
+{% block content %}
+    <!-- Basic with Icons -->
+    <div class="col-xxl">
+        <div class="card mb-4">
+            <div class="card-header d-flex align-items-center justify-content-between">
+                <h5 class="mb-0">Crear nuevo usuario</h5>
+                <small class="text-muted float-end">Datos Personales</small>
+            </div>
+            <div class="card-body">
+                <form enctype="multipart/form-data" method="post" id="update-form">
+                    {% csrf_token %}
+                    {% crispy form %}
+                    {% crispy user_form %}
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

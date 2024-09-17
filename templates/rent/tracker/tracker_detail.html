@@ -1,0 +1,76 @@
+{% extends "base/base.html" %}
+{% block page %}
+  {% block map_scripts %}
+  {% endblock map_scripts %}
+  <script>
+        function deleteTracker() {
+            let confirmAction = confirm("Are you sure to delete the tracker?");
+            if (confirmAction) {
+                 window.location = "{% url 'delete-tracker' tracker.id %}";
+            }
+        }
+  </script>
+{% endblock page %}
+{% block content %}
+  {% block map %}
+  {% endblock map %}
+  {% block table %}
+  {% endblock table %}
+  <div class="card">
+    <div class="card-header">
+      <h3>Tracker Information</h3>
+    </div>
+    <div class="card-body">
+      <div class="row">
+        <p>Last Update: {{ tracker.last_update }}</p>
+      </div>
+      <div class="row">
+        <div class="col-md-6">
+          <div class="form-group">
+            <label for="imei">IMEI:</label>
+            <p>{{ tracker.imei }}</p>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="form-group">
+            <label for="Mode">Mode:</label>
+            <p>{{ tracker.get_Mode_display }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-6">
+          <div class="form-group">
+            <label for="device_id">Device ID:</label>
+            <p>{{ tracker.device_id }}</p>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="form-group">
+            <label for="device_password">Device Password:</label>
+            <p>{{ tracker.device_password }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-4">
+          <div class="form-group">
+            <label for="Tint">Tint:</label>
+            <p>{{ tracker.Tint }}</p>
+          </div>
+        </div>
+        <div class="col-4">
+          <div class="form-group">
+            <label for="TGPS">TGPS:</label>
+            <p>{{ tracker.TGPS }}</p>
+          </div>
+        </div>
+        <div class="col-4">
+          <div class="form-group">
+            <label for="Tsend">Tsend:</label>
+            <p>{{ tracker.Tsend }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endblock content %}

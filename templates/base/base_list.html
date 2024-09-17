@@ -1,0 +1,108 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% block title %}
+{% endblock title %}
+{% block page %}
+    <style>
+        .add {
+            position: fixed;
+            font-size: 27px;
+            bottom: 3rem;
+            right: 1.625rem;
+            z-index: 999999;
+            box-shadow: 0 1px 20px 1px #696cff;
+        }
+        .add .tooltip{
+            opacity: 1;
+        }
+        .tooltip-inner{
+            font-size: 10px;
+        }
+        .tabs {
+            padding-top: 0;
+        }
+        html {
+            height: 110%;
+            margin-bottom: 0.01em;
+        }
+        .pl-0 {
+            padding-left: 0! important;
+        }
+        .stock{
+            border: 2px solid #fff;
+        }
+        .chapilla{
+            position: relative;
+        }
+        .chapilla a{
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .chapilla a span{
+            font-size: 15px;
+            color: white;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-100%, -20%);
+        }
+        .chapilla span{
+            font-size: 15px;
+            position: absolute;
+            bottom: 5%;
+            right: 5%;
+        }
+        .sortable {
+            font-size: 7px;
+        }
+    </style>
+    {% block extra_scripts %}
+    {% endblock extra_scripts %}
+{% endblock page %}
+{% block content %}
+    {% block nav %}
+    {% endblock nav %}
+    <!-- Basic with Icons -->
+    <div class="card">
+        {% block card %}
+            <div class="list-head">
+                {% block Ttitle %}
+                {% endblock Ttitle %}
+            </div>
+            <div class="table-responsive text-nowrap">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            {% block Theader %}
+                            {% endblock Theader %}
+                        </tr>
+                    </thead>
+                    <tbody class="table-border-bottom-0" x-data>
+                        {% block Tbody %}
+                        {% endblock Tbody %}
+                    </tbody>
+                </table>
+            </div>
+        {% endblock card %}
+    </div>
+    {% block addButton %}
+        <a href="{% block createUrl %} {% endblock createUrl %}">
+            <button type="button"
+                    style="visibility: {% block add %}{% endblock add %}"
+                    class="btn rounded-pill btn-primary btn-icon add"
+                    data-bs-toggle="tooltip"
+                    data-bs-offset="0,4"
+                    data-bs-placement="left"
+                    data-bs-html="true"
+                    title=""
+                    data-bs-original-title="{% block help %} {% endblock help %}">
+                <b>+</b>
+            </button>
+        </a>
+    {% endblock addButton %}
+{% endblock content %}
+{% block scripts %}
+    <script src="{%static 'assets/js/base-list.js'%}"></script>
+{% endblock scripts %}

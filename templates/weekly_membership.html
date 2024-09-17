@@ -1,0 +1,26 @@
+{% extends 'membership.html' %}
+{% load static %}
+{% load tz %}
+{% block title %}
+    TOWIT weekly report
+{% endblock title %}
+{% localtime on %}
+{% block nav %}
+    <!-- Week -->
+    <div class="text-center">
+        <div class="demo-inline-spacing pb-3">
+            <a type="button"
+               href="{% url 'weekly-membership-date' previousWeek %}"
+               class="btn btn-icon btn-outline-primary">
+                <span class="tf-icons bx bx-chevron-left"></span>
+            </a>
+            <button type="button" class="btn btn-outline-primary">{{ start_date|date:"d/M" }} - {{ end_date|date:"d/M" }}</button>
+            <a type="button"
+               href="{% url 'weekly-membership-date' nextWeek %}"
+               class="btn btn-icon btn-outline-primary">
+                <span class="tf-icons bx bx-chevron-right"></span>
+            </a>
+        </div>
+    </div>
+{% endblock nav %}
+{% endlocaltime %}

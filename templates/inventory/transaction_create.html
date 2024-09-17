@@ -1,0 +1,130 @@
+{% extends 'base/base_form.html' %}
+{% load crispy_forms_tags %}
+{% block title %}
+    Añadir Transacción
+{% endblock title %}
+{% block content %}
+    <!-- Basic with Icons -->
+    <div class="col-xxl">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5>{{ title }}</h5>
+                <form enctype="multipart/form-data" method="post" id="update-form">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-12">
+                            Product: <b>{{ product.name }}</b>
+                            {% if form.instance.id %}
+                                <a onclick="deleteTransaction('{% url 'delete-transaction' form.instance.id %}', '{{ product.name }}')"
+                                   type="button"
+                                   class="btn btn-icon btn-outline-danger float-end">
+                                    <span class="tf-icons bx bx-trash"></span>
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% if price_references %}
+                        <div class="demo-inline-spacing mb-3">
+                            {% for price in price_references %}
+                                <a type="button"
+                                   class="btn rounded-pill btn-outline-primary"
+                                   target="blank"
+                                   href="{{ price.url }}">{{ price.store }}  (${{ price.price|floatformat:"-1" }})</a>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    {% crispy form %}
+                </div>
+            </form>
+        </div>
+    </div>
+    <script>
+        function deleteTransaction(url, name) {
+            let confirmAction = confirm("Are you sure to delete the product " + name + " from this order?");
+            if (confirmAction) {
+                window.location = url;
+            }
+        }
+        let helptext, unit_select, price, check, tax_input, tax_value;
+
+        // Clean select options
+        function removeAll(selectBox) {
+            while (selectBox.options.length > 0) {
+                selectBox.remove(0);
+            }
+        }
+        let minimum = {{product.min_price|stringformat:"f" }};
+        let suggested = {{suggested|stringformat:"f" }};
+        let cost = {{cost|stringformat:"f" }};
+        suggested = Math.max(suggested, minimum);
+        const units = {};
+        const factors = {};
+        {% for unit in units %}        
+            {% if forloop.first %}            let unit = {{unit.id}};{% endif %}
+            units["{{unit.name}}"] = {{unit.id}};
+            factors[{{unit.id}}]={{unit.factor|stringformat:"f"}};
+        {% endfor %}
+
+        function updateUnits(event){            
+                removeAll(unit_select);
+                // Iterate for cities in the state
+                let newOption;
+                for (const [unit, factor] of Object.entries(units)) {
+                    newOption = new Option(unit, factor);
+                    unit_select.add(newOption,undefined);
+                }
+                unit_select.add(newOption,undefined);
+            }
+        function updatePrice(event){
+            console.log(unit_select.value)
+            if (unit_select.value != unit)
+            {
+                suggested = suggested*factors[unit_select.value]/factors[unit];
+                cost = cost*factors[unit_select.value]/factors[unit];
+                price.value = Math.ceil(suggested*100)/100;
+
+                minimum = minimum*factors[unit_select.value]/factors[unit];
+                unit_name = unit_select.options[unit_select.selectedIndex].text;
+                helptext.innerHTML=`Minimum: \$${minimum.toFixed(2)}/${unit_name}. Cost: \$${cost.toFixed(2)}/${unit_name}.`
+
+                unit = unit_select.value;
+            }
+        }
+        function checkTax(){
+            if (check.checked != true)
+            {
+                //tax_input.disabled=true;
+                tax_input.value=0;
+            } 
+            else {
+                //tax_input.disabled=false;
+                tax_input.value=tax_value;
+            }
+        }
+
+        function createTaxCheckbox(){
+            const tax = document.getElementById('div_id_tax');
+            const ig = tax.getElementsByClassName("input-group")[0];
+            ig.innerHTML = '<div class="input-group-text"> <input id="tax_check" onclick="checkTax()" class="form-check-input mt-0" type="checkbox"></div>' + ig.innerHTML;
+            check = document.getElementById("tax_check");
+
+            // Prepare tax input
+            tax_input = document.getElementById("id_tax");
+            tax_value = tax_input.value;
+            check.checked = true;
+            //tax_input.disabled=true;
+            //tax_input.value=0;
+        }
+
+        window.addEventListener("load", (event) => {
+            unit_select = document.getElementById("id_unit");
+            helptext = document.getElementById("hint_id_price");
+            price = document.getElementById("id_price");
+            
+            unit_select.onchange = updatePrice;
+            updateUnits();
+
+            {% if create %}createTaxCheckbox();{% endif %}
+          });
+    </script>
+{% endblock content %}

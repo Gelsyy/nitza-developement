@@ -1,0 +1,138 @@
+- model: inventory.producttransaction
+  pk: 33
+  fields:
+    order: 3
+    product: 1
+    tax: 0
+    price: 120
+    quantity: 2
+    unit: 2
+- model: inventory.producttransaction
+  pk: 34
+  fields:
+    order: 3
+    product: 2
+    tax: 0
+    price: 180
+    quantity: 2
+    unit: 2
+- model: inventory.producttransaction
+  pk: 35
+  fields:
+    order: 3
+    product: 8
+    tax: 0
+    price: 75
+    quantity: 2
+    unit: 2
+- model: inventory.producttransaction
+  pk: 36
+  fields:
+    order: 3
+    product: 4
+    tax: 0
+    price: 10
+    quantity: 2
+    unit: 2
+- model: inventory.producttransaction
+  pk: 37
+  fields:
+    order: 3
+    product: 21
+    tax: 0
+    price: 0
+    quantity: 16
+    unit: 2
+- model: inventory.producttransaction
+  pk: 38
+  fields:
+    order: 3
+    product: 6
+    tax: 0
+    price: 25
+    quantity: 2
+    unit: 2
+- model: inventory.producttransaction
+  pk: 39
+  fields:
+    order: 3
+    product: 24
+    tax: 0
+    price: 0
+    quantity: 3
+    unit: 2
+- model: inventory.producttransaction
+  pk: 40
+  fields:
+    order: 3
+    product: 25
+    tax: 0
+    price: 0
+    quantity: 2
+    unit: 2
+- model: inventory.producttransaction
+  pk: 41
+  fields:
+    order: 4
+    product: 1
+    tax: 0
+    price: 120
+    quantity: 2
+    unit: 2
+- model: inventory.producttransaction
+  pk: 42
+  fields:
+    order: 4
+    product: 2
+    tax: 0
+    price: 180
+    quantity: 2
+    unit: 2
+- model: inventory.producttransaction
+  pk: 43
+  fields:
+    order: 4
+    product: 4
+    tax: 0
+    price: 10
+    quantity: 2
+    unit: 2
+- model: inventory.producttransaction
+  pk: 44
+  fields:
+    order: 4
+    product: 21
+    tax: 0
+    price: 0
+    quantity: 16
+    unit: 2
+- model: inventory.producttransaction
+  pk: 45
+  fields:
+    order: 4
+    product: 14
+    tax: 0
+    price: 25
+    quantity: 2
+    unit: 2
+- model: inventory.producttransaction
+  pk: 46
+  fields:
+    order: 4
+    product: 24
+    tax: 0
+    price: 0
+    quantity: 3
+    unit: 2
+- model: inventory.producttransaction
+  pk: 47
+  fields:
+    order: 4
+    product: 25
+    tax: 0
+    price: 0
+    quantity: 2
+    unit: 2
+
+
+

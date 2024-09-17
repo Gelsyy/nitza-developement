@@ -1,0 +1,35 @@
+{% extends 'base/base_select.html' %}
+{% block title %}
+    {{ title }}
+{% endblock title %}
+{% block Ctitle %}
+    Select company
+    <form enctype="multipart/form-data" method="post" id="update-form">
+        {% csrf_token %}
+        <div>
+            <input type="hidden" name="next" value="{{ next }}" />
+        </div>
+        <div>
+            <input type="hidden" name="id" value="{{ towit.id }}" />
+        </div>
+        <div class="float-end">
+            <button class="btn btn-outline-primary" type="submit">TOWIT</button>
+            {% if skip %}
+                <a href="{% url 'create-service-order' %}"
+                   type="button"
+                   class="btn btn-outline-primary">Skip</a>
+            {% endif %}
+        </div>
+    </form>
+{% endblock Ctitle %}
+{% block Cards %}
+    {% for company in companies %}
+        <div class="col-md-6 infocard">{% include "users/company/select_card.html" %}</div>
+    {% endfor %}
+{% endblock Cards %}
+{% block createUrl %}
+    {% url 'create-company' %}?next={{ request.path|urlencode }}
+{% endblock createUrl %}
+{% block help %}
+    New company
+{% endblock help %}

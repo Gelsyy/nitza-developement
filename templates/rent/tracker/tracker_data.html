@@ -1,0 +1,132 @@
+{% extends "./tracker_detail.html" %}
+{% load tz %}
+{% load static %}
+{% block map_scripts %}
+    <link rel="stylesheet"
+          href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+          integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+          crossorigin="" />
+    <script type="text/javascript" src="{% static '/js/leaflet.js' %}"></script>
+    {% comment %} <script type="text/javascript" src="{% static '/js/date.format.js' %}"></script> {% endcomment %}
+    <style>#map { height: 450px; }</style>
+{% endblock map_scripts %}
+{% block map %}
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3>
+                Tracker <b> {{ tracker.id }}</b>
+                <a class="btn btn-icon btn-outline-primary"
+                   type="button"
+                   href="{% url 'update-tracker' tracker.id %}">
+                    <span class="tf-icons bx bx-edit"></span>
+                </a>
+                <button onclick="deleteTracker()"
+                        class="btn btn-icon btn-outline-danger float-end">
+                    <span class="tf-icons bx bx-trash"></span>
+                </button>
+            </h3>
+            {% if tracker.trailer %}
+                <div class="d-flex">
+                    {% include "rent/equipment_line.html" with equipment=tracker.trailer equipment_type="trailer" pinned_image=tracker.trailer.pinned_image %}
+                </div>
+            {% endif %}
+        </div>
+        <div id="map"></div>
+        <div class="card-body">
+            Last update: <span {% if tracker.online != True %}class="text-danger"{% endif %}>{{ data.timestamp|timesince }}</span>
+        </div>
+    </div>
+    <script>
+         // Creating map options
+         var mapOptions = {
+         center: [{{ data.latitude }}, {{ data.longitude }}],
+         zoom: 6
+         }
+         
+         // Creating a map object
+         var map = new L.map("map", mapOptions);
+         
+         // Creating a Layer object
+         var layer = new  L.TileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
+         
+         // Adding layer to the map
+         map.addLayer(layer);
+         
+         var marker = L.marker([{{ data.latitude }}, {{ data.longitude }}]).addTo(map);
+         
+         function update_map(lat, lon, speed, dt){
+             // Update MAP
+            if (marker != undefined) {
+              map.removeLayer(marker);
+            };
+            marker = L.marker([lat, lon]).addTo(map);
+            map.panTo(new L.LatLng(lat, lon));
+            // Update data
+            document.getElementById("speed").innerHTML=speed
+            document.getElementById("lat").innerHTML=lat
+            document.getElementById("lon").innerHTML=lon
+            document.getElementById("datetime").innerHTML=dt
+         }
+    </script>
+{% endblock map %}
+{% block table %}
+    <div class="card mb-4">
+        <div class="card-body">
+            <h4 class="mt-3">
+                <b>History </b>
+                <button onclick="uploadHistory()"
+                        class="btn btn-icon btn-outline-primary"
+                        type="button"
+                        href="{% url 'export-inventory' %}">
+                    <span class="tf-icons bx bx-share-alt"></span>
+                </button>
+            </h4>
+            <div class="row">
+                <div class="table-responsive col-md-6 overflow-auto"
+                     style="max-height: 500px">
+                    <table id="table"
+                           class="table table-striped table-bordered table-sm"
+                           cellspacing="0"
+                           width="100%">
+                        <thead>
+                            <tr>
+                                <th class="th-sm">Seq/Src</th>
+                                <th class="th-sm">Datetime</th>
+                                <th class="th-sm">Vbat</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for element in history %}
+                                <tr>
+                                    <td>
+                                        <a>{{ element.sequence }}</a>
+                                        {{ element.source }}
+                                    </td>
+                                    <td>
+                                        <button class="btn rounded-pill btn-outline-primary"
+                                                onclick="update_map({{ element.latitude }}, {{ element.longitude }}, {{ element.speed }}, '{{ element.timestamp }}')">
+                                            {{ element.timestamp|date:'m/d/Y h:i:s A' }}
+                                        </button>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-{% if element.charging %}success"{% else %}{% if element.battery < 25 %}danger{% else %}warning{% endif %}{% endif %}">{{ element.battery|floatformat:"0" }}%</span>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col-md-6 flex">
+                    <b>Datetime: </b>
+                    <div class="datetime" id="datetime">{{ data.timestamp|utc|date:'m/d/Y h:i:s A' }}</div>
+                    <b>Latitude: </b>
+                    <div id="lat">{{ data.latitude }}</div>
+                    <b>Longitude: </b>
+                    <div id="lon">{{ data.longitude }}</div>
+                    <b>Speed: </b>
+                    <div id="speed">{{ data.speed }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock table %}

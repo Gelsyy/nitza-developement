@@ -1,0 +1,41 @@
+{% extends 'base/base_list.html' %}
+{% block title %}
+    {{ title }}
+{% endblock title %}
+{% block Ttitle %}
+    <h5 class="card-header">Kits</h5>
+{% endblock Ttitle %}
+{% block Theader %}
+    <th>
+        <i class="bx bx-cog"></i>
+    </th>
+    <th>Name</th>
+    <th>Price</th>
+{% endblock Theader %}
+{% block Tbody %}
+    {% for kit in kits %}
+        <tr x-show="match('{{kit.category.name|escapejs}} | {{kit.name|escapejs}}', $store.search.search)">
+        <!-- data-search="{{ kit.category.name }}" data-search="{{ kit.name }}"> -->
+            <td>
+                <a href={% url 'detail-kit' kit.id %}><i class="bx bx-dots-vertical-rounded"></i></a>
+            </td>
+            <td>
+                <div>
+                    <strong x-html="highlightMatch('{{kit.name|escapejs}}', $store.search.search)">
+                        {{ kit.name }}
+                    </strong>
+                </div>
+                <small x-show="match('{{kit.category.name|escapejs}}', $store.search.search) && $store.search.search != ''"
+                       x-html="highlightMatch('{{kit.category.name|escapejs}}', $store.search.search)"
+                       x-cloak></small>
+            </td>
+            <td>${{ kit.total|floatformat:"2" }}</td>
+        </tr>
+    {% endfor %}
+{% endblock Tbody %}
+{% block createUrl %}
+    {% url 'create-kit' %}
+{% endblock createUrl %}
+{% block help %}
+    Add kit
+{% endblock help %}

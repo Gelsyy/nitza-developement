@@ -1,0 +1,72 @@
+{% extends 'base/base_form.html' %}
+{% load crispy_forms_tags %}
+{% block title %}
+    Add expense
+{% endblock title %}
+{% block img_id %}
+    const img_id = "id_image";
+{% endblock img_id %}
+{% block content %}
+    <!-- Basic with Icons -->
+    <div class="col-xxl">
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row">
+                    <h5>
+                        {{ title }}
+                        {% if form.instance.id %}
+                            <a onclick="deleteExpense('{% url 'delete-expense' form.instance.id %}', '{{ expense.concept }}')"
+                               type="button"
+                               class="btn btn-icon btn-outline-danger float-end">
+                                <span class="tf-icons bx bx-trash"></span>
+                            </a>
+                        {% endif %}
+                    </h5>
+                </div>
+                <form enctype="multipart/form-data" method="post" id="update-form">
+                    {% csrf_token %}
+                    {% crispy form %}
+                </form>
+            </div>
+        </div>
+    </div>
+    <script>
+        let provider_select;
+
+        function deleteExpense(url, name) {
+            let confirmAction = confirm("Are you sure to delete the expense " + name + " from this order?");
+            if (confirmAction) {
+                window.location = url;
+            }
+        }
+
+        const providers = {};
+
+        {% for provider in outsource %}providers["{{provider.id}}"] = "{{provider.name}}";{% endfor %}
+
+        // Clean select options
+        function removeAll(selectBox) {
+            while (selectBox.options.length > 1) {
+                selectBox.remove(1);
+            }
+        }
+
+        function updateProviders(event){            
+            removeAll(provider_select);
+            // Iterate for cities in the state
+            let newOption;
+            for (const [id, name] of Object.entries(providers)) {
+                newOption = new Option(name, id);
+                provider_select.add(newOption,undefined);
+            }
+            provider_select.add(newOption,undefined);
+        }
+
+        window.addEventListener("load", (event) => {
+            provider_select = document.getElementById("id_associated");    
+            const initial = provider_select.value;
+            updateProviders();
+            provider_select.value = initial;
+          });
+    </script>
+{% endblock content %}
