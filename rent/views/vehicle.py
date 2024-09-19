@@ -23,6 +23,7 @@ from rent.permissions import staff_required
 from users.models import Company
 from users.views import processOrders
 from utils.models import Order
+from datetime import timedelta, date
 
 # -------------------- Equipment ----------------------------
 
@@ -296,7 +297,7 @@ FILES_ICONS = {
 
 @login_required
 def detail_trailer(request, id):
-    # fetch the object related to passed id
+    # Fetch the trailer object
     trailer = get_object_or_404(Trailer, id=id)
     orders = Order.objects.filter(trailer=trailer).order_by("-created_date")
     images, pinned_image = getImages(trailer)
@@ -313,12 +314,23 @@ def detail_trailer(request, id):
         trailer.reservation = trailer_deposits
 
     documents = TrailerDocument.objects.filter(trailer=trailer, is_active=True)
-    # Check for document expiration
+    
+    # Categorize documents
+    valid_documents = []
+    warning_documents = []
+    expired_documents = []
+    
+    today = date.today()
     for document in documents:
-        document.is_expired = document.is_expired()
-        document.alarm = document.remainder()
-        document.icon = "assets/img/icons/" + \
-            FILES_ICONS[document.document_type]
+        document.icon = "assets/img/icons/" + FILES_ICONS[document.document_type]
+        if document.expiration_date:
+            if document.expiration_date < today:
+                expired_documents.append(document)
+            elif document.expiration_date <= today + timedelta(days=7):
+                warning_documents.append(document)
+            else:
+                valid_documents.append(document)
+
     # Get tracker
     trailer.tracker = Tracker.objects.filter(trailer=trailer).first()
 
@@ -338,7 +350,9 @@ def detail_trailer(request, id):
         "orders": orders,
         "towit_total": towit_total,
         "client_total": client_total,
-        "documents": documents,
+        "valid_documents": valid_documents,
+        "warning_documents": warning_documents,
+        "expired_documents": expired_documents,
         "equipment": trailer,
         "pinned_image": pinned_image,
         "images": images,
@@ -347,7 +361,6 @@ def detail_trailer(request, id):
     }
 
     return render(request, "rent/equipment_detail.html", context)
-
 
 @login_required
 @staff_required

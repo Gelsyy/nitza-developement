@@ -201,3 +201,10 @@ class KitService(models.Model):
     # Linking a product to a kit
     kit = models.ForeignKey(ProductKit, on_delete=models.CASCADE)
     service = models.ForeignKey(Service, on_delete=models.CASCADE)
+
+class DocumentCategory(models.Model):
+    name = models.CharField(max_length=120, unique=True)
+    description = models.TextField(blank=True)
+
+    def __str__(self):
+        return self.name
