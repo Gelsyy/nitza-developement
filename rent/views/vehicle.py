@@ -40,7 +40,7 @@ def list_equipment(request):
     }
     trailers = Trailer.objects.filter(active=True)
     for trailer in trailers:
-        # Contracts
+        # Contratos
         contracts = Contract.objects.filter(trailer=trailer).exclude(
             stage__in=("ended", "garbage")
         )
@@ -75,32 +75,39 @@ def list_equipment(request):
 
         active_filters[trailer.filter] += 1
 
-        # Images
-        images, pinned_image = getImages(trailer)
-        trailer.images = images
-        trailer.pinned_image = pinned_image
-        # Documents
-        doc_color = None
+        # Documentos
         docs = TrailerDocument.objects.filter(trailer=trailer, is_active=True)
+        trailer.doc_badge = None 
         if docs:
-            doc_color = "green"
-        for doc in docs:
-            if doc.remainder():
-                doc_color = "orange"
-            if doc.is_expired():
-                doc_color = "red"
-                break
-        if doc_color is not None:
-            trailer.doc_color = f"assets/img/icons/doc_{doc_color}.png"
+            all_valid = True
+            for doc in docs:
+                if doc.is_expired():
+                    trailer.doc_badge = {
+                        "color": "danger",
+                        "text": doc.name, 
+                    }
+                    all_valid = False
+                    break
+                elif doc.remainder():
+                    trailer.doc_badge = {
+                        "color": "warning",
+                        "text": doc.name,  
+                    }
+                    all_valid = False
+                    break
+
+                if all_valid:
+                    trailer.doc_badge = {
+                        "color": "success",
+                        "text": "All Documents Valid",
+                    }
+
         # Orders
         last_order = (
-            Order.objects.filter(trailer=trailer).order_by(
-                "-created_date").first()
+            Order.objects.filter(trailer=trailer).order_by("-created_date").first()
         )
         if last_order is not None:
             trailer.last_order = last_order
-        # Number
-        trailer.number = trailer.vin[-4:]
 
     inactive_filters = {
         "Available": 0,
@@ -109,10 +116,10 @@ def list_equipment(request):
     }
     inactive_trailers = Trailer.objects.filter(active=False)
     for trailer in inactive_trailers:
-        # Contracts
+        # Contratos
         contracts = (
             Contract.objects.filter(
-                trailer=trailer,  # stage__in=["active", "missing"]
+                trailer=trailer,
             )
             .exclude(stage="ended")
             .order_by("-created_at")
@@ -130,30 +137,32 @@ def list_equipment(request):
 
         inactive_filters[trailer.filter] += 1
 
-        # Images
-        images, pinned_image = getImages(trailer)
-        trailer.images = images
-        trailer.pinned_image = pinned_image
-        # Documents
-        doc_color = None
+        # Documentos
         docs = TrailerDocument.objects.filter(trailer=trailer, is_active=True)
+        trailer.doc_badge = None 
         if docs:
-            doc_color = "green"
-        for doc in docs:
-            if doc.remainder():
-                doc_color = "orange"
-            if doc.is_expired():
-                doc_color = "red"
-                break
-        if doc_color is not None:
-            trailer.doc_color = f"assets/img/icons/doc_{doc_color}.png"
-        # Orders
-        last_order = (
-            Order.objects.filter(trailer=trailer).order_by(
-                "-created_date").first()
-        )
-        if last_order is not None:
-            trailer.last_order = last_order
+            all_valid = True
+            for doc in docs:
+                if doc.is_expired():
+                    trailer.doc_badge = {
+                        "color": "danger",
+                        "text": doc.name,  
+                    }
+                    all_valid = False
+                    break
+                elif doc.remainder():
+                    trailer.doc_badge = {
+                        "color": "warning",
+                        "text": doc.name, 
+                    }
+                    all_valid = False
+                    break
+
+                if all_valid:
+                    trailer.doc_badge = {
+                        "color": "success",
+                        "text": "All Documents Valid",
+                    }
 
     context = {
         "trailers": trailers,
@@ -297,7 +306,7 @@ FILES_ICONS = {
 
 @login_required
 def detail_trailer(request, id):
-    # Fetch the trailer object
+    # fetch the object related to passed id
     trailer = get_object_or_404(Trailer, id=id)
     orders = Order.objects.filter(trailer=trailer).order_by("-created_date")
     images, pinned_image = getImages(trailer)
@@ -314,23 +323,11 @@ def detail_trailer(request, id):
         trailer.reservation = trailer_deposits
 
     documents = TrailerDocument.objects.filter(trailer=trailer, is_active=True)
-    
-    # Categorize documents
-    valid_documents = []
-    warning_documents = []
-    expired_documents = []
-    
-    today = date.today()
+    # Check for document expiration
     for document in documents:
+        document.is_expired = document.is_expired()
+        document.alarm = document.remainder()
         document.icon = "assets/img/icons/" + FILES_ICONS[document.document_type]
-        if document.expiration_date:
-            if document.expiration_date < today:
-                expired_documents.append(document)
-            elif document.expiration_date <= today + timedelta(days=7):
-                warning_documents.append(document)
-            else:
-                valid_documents.append(document)
-
     # Get tracker
     trailer.tracker = Tracker.objects.filter(trailer=trailer).first()
 
@@ -350,9 +347,7 @@ def detail_trailer(request, id):
         "orders": orders,
         "towit_total": towit_total,
         "client_total": client_total,
-        "valid_documents": valid_documents,
-        "warning_documents": warning_documents,
-        "expired_documents": expired_documents,
+        "documents": documents,
         "equipment": trailer,
         "pinned_image": pinned_image,
         "images": images,
