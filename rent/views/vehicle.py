@@ -99,7 +99,7 @@ def list_equipment(request):
                 if all_valid:
                     trailer.doc_badge = {
                         "color": "success",
-                        "text": "All Documents Valid",
+                        "text": "OK",
                     }
 
         # Orders
@@ -161,7 +161,7 @@ def list_equipment(request):
                 if all_valid:
                     trailer.doc_badge = {
                         "color": "success",
-                        "text": "All Documents Valid",
+                        "text": "OK",
                     }
 
     context = {
